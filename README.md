@@ -1,12 +1,14 @@
 # BT-Speaker
 
 A simple Bluetooth Speaker Daemon designed for the Raspberry Pi 3.
+Work also with a Pi zero add a hifiberry clone like pizeroaudio.
 
 BT-Speaker aims to _just work_ on a vanilla installation using pure ALSA.
 
 ## Installation
 
 Quick Installation for Raspberry Pi OS:
+In Pi zero case, install drivers accordingly to the hardware you have
 
 ```bash
 sudo -i
@@ -44,6 +46,7 @@ The default settings of BT-Speaker will be copied and can be overridden in `/etc
 | Section    | Key                | Default Value                    | Description                                                                                                                                                |
 | ---------- | ------------------ | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | bt_speaker | play_command       | aplay -f cd -                    | The raw audio in CD Format (16bit little endian, 44100Hz, stereo) is piped to this command.                                                                |
+|bt_speaker | buffer_size | 25600 | Size of the music buffer of avoid disruption into the music flow |
 | bt_speaker | connect_command    | /etc/bt_speaker/hooks/connect    | Command that is called when an audio device connects to BT-Speaker                                                                                         |
 | bt_speaker | disconnect_command | /etc/bt_speaker/hooks/disconnect | Command that is called when an audio device disconnects from BT-Speaker                                                                                    |
 | bluez      | device_path        | /org/bluez/hci0                  | The DBUS path where BT-Speaker can find the bluetooth device                                                                                               |
@@ -53,6 +56,12 @@ The default settings of BT-Speaker will be copied and can be overridden in `/etc
 | alsa       | mixer              |                                  | The volume of this mixer will be set from AVRCP messages (Remote volume control) Use `HDMI` or `Headphone`. If not set, the first mixer available is used. |
 | alsa       | id                 | 0                                | The alsa id of the mixer control                                                                                                                           |
 | alsa       | cardindex          | 0                                | The alsa cardindex of the soundcard                                                                                                                        |
+| default | name | Anonymous | Name provided to the scripts as the default name of the connected device |
+| default | hello | | default raw music file in sounds folder sent on connection |
+| default | bye | | default raw music file in sounds folder sent on disconnection |
+| XX:XX:XX:XX:XX:XX | name | | Name of the device owner |
+| XX:XX:XX:XX:XX:XX | hello | | Custom Raw music file in sounds folder sent on connection |
+| XX:XX:XX:XX:XX:XX | bye | | Custom Raw music file in sounds folder sent on disconnection |
 
 The settings in the alsa section specify on which alsa mixer ([more info here](https://larsimmisch.github.io/pyalsaaudio/libalsaaudio.html#mixer-objects)) volume changes are applied.
 You need to adjust these settings if you are using an external sound card.
@@ -84,6 +93,14 @@ The great [BT-Manager](https://github.com/liamw9534/bt-manager) library does (cu
 Changes in the Bluez DBUS API [from version 4 to 5](http://www.bluez.org/bluez-5-api-introduction-and-porting-guide/) were huge and fully porting BT-Manager would have been a too heavy task.
 So instead, I extracted all relevant parts and ported them to Bluez5 as good as I could.
 Documentation and probably lots of other parts there have yet to be adjusted, so refer to [that code](bt_manager) with caution.
+
+### About Raw music files ###
+
+To customise the connection, disconnection, startup, you can add raw music files. Those files must be in a stereo, headerless and singed 16 bit PCM format at 44100Hz.
+
+Why raw format ?
+
+Because the content of the file is directly injected into aplay through the pipe like the sound from bluetooth device.
 
 ### About the audio stream
 
