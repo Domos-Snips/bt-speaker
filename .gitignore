@@ -2,3 +2,5 @@
 __pycache__
 codecs/*.so
 codecs/*.o
+sounds/*
+config.ini.307
