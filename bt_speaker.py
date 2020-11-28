@@ -39,7 +39,7 @@ class PipedSBCAudioSinkWithAlsaVolumeControl(SBCAudioSink):
         self.process = subprocess.Popen(
             config.get('bt_speaker', 'play_command'),
             shell=True,
-            bufsize=2560,
+            bufsize=config.get('bt_speaker', 'buffer_size'),
             stdin=subprocess.PIPE
         )
 
@@ -138,6 +138,7 @@ class AutoAcceptSingleAudioAgent(BTAgent):
         self.track_callback(properties['Track'])
 
     def _track_connection_state(self, addr, properties, signature, device):
+        btmac= device.split('/')[4].replace('dev_','').replace('_',':')
         if self.connected and self.connected != device: return
         if not 'Connected' in properties: return
 
@@ -145,13 +146,13 @@ class AutoAcceptSingleAudioAgent(BTAgent):
             print("Device connected. device=%s" % device)
             self.connected = device
             self.update_discoverable()
-            self.connect_callback()
+            self.connect_callback(btmac)
 
         elif self.connected and not bool(properties['Connected']):
             print("Device disconnected. device=%s" % device)
             self.connected = None
             self.update_discoverable()
-            self.disconnect_callback()
+            self.disconnect_callback(btmac)
 
 def setup_bt():
     # register sink and media endpoint
@@ -160,20 +161,64 @@ def setup_bt():
     media.register_endpoint(sink._path, sink.get_properties())
 
     def startup():
+        print("startup")
         command = config.get('bt_speaker', 'startup_command')
         if not command: return
         subprocess.Popen(command, shell=True).communicate()
+        sound = config.get('default','hello')
+        if sound:
+          playrawsound(sound)
 
-    def connect():
+    def playrawsound(sound):
+        try:
+          with open(SCRIPT_PATH + "/sounds/"+sound,"rb") as audio:
+            buf=audio.read(4096)
+            while len(buf)>0:
+              sink.process.stdin.write(buf)
+              buf=audio.read(4096)
+        except:
+          pass
+
+    def connect(device):
+        print("connect")
         command = config.get('bt_speaker', 'connect_command')
-        if not command: return
-        subprocess.Popen(command, shell=True).communicate()
+        if command:
+          env=dict()
+          env['device'] = device
+          try:
+            name = config.get(device,'name')
+          except:
+            name = config.get('default','name')
+          if name:
+            env['name'] = name
+          subprocess.Popen(command, shell=True,env=env).communicate()
+        print("play custom message")
+        try:
+          sound = config.get(device,'hello')
+        except:
+          sound = config.get('default','hello')
+        if sound:
+          playrawsound(sound)
 
-    def disconnect():
+    def disconnect(device):
         sink.close_transport()
         command = config.get('bt_speaker', 'disconnect_command')
-        if not command: return
-        subprocess.Popen(command, shell=True).communicate()
+        if command:
+          env=dict()
+          env['device'] = device
+          try:
+            name = config.get(device,'name')
+          except:
+            name = config.get('default','name')
+          if name:
+            env['name'] = name
+          subprocess.Popen(command, shell=True, env=env).communicate()
+        try:
+          sound = config.get(device,'bye')
+        except:
+          sound = config.get('default','bye')
+        if sound:
+          playrawsound(sound)
 
     def track(data):
         command = config.get('bt_speaker', 'track_command')
