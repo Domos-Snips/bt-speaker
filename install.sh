@@ -4,6 +4,7 @@ set -e
 # This script has been tested on 2020/07/19
 # OS: Raspbian GNU/Linux 10 (buster)
 # Model: Raspberry Pi 3 Model B Rev 1.2
+# Model: Raspberry Pi 0 HW  Rev 1.3 + Hifi-berry(pizeroaudio)
 
 echo "Installing dependencies..."
 apt-get update
