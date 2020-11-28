@@ -1,7 +1,8 @@
 # BT-Speaker
 
 A simple Bluetooth Speaker Daemon designed for the Raspberry Pi 3.
-Work also with a Pi zero add a hifiberry clone like pizeroaudio.
+
+Works also with a Pi zero add a hifiberry clone like pizeroaudio.
 
 BT-Speaker aims to _just work_ on a vanilla installation using pure ALSA.
 
