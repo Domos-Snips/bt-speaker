@@ -1,5 +1,6 @@
 [bt_speaker]
 play_command = aplay -f cd -
+buffer_size = 25600
 connect_command = /etc/bt_speaker/hooks/connect
 disconnect_command = /etc/bt_speaker/hooks/disconnect
 startup_command = /etc/bt_speaker/hooks/startup
@@ -12,6 +13,15 @@ pin_code = 0000
 
 [alsa]
 enabled = yes
-mixer = 
+mixer =
 id = 0
 cardindex = 0
+
+[58:C1:5F:FA:69:5F]
+name = Papa
+hello = papa.raw
+
+[default]
+name = "Anonymous"
+bye = aurevoir.raw
+hello = bonjour.raw
